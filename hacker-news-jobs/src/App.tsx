@@ -43,6 +43,28 @@ function App() {
       }
     });
   };
+  const sendAPITestMsg = () => {
+    const message: ChromeMessage = {
+      from: Sender.React,
+      message: "APITest",
+    }
+
+    const queryInfo: chrome.tabs.QueryInfo = {
+      active: true,
+      currentWindow: true
+    };
+    chrome.tabs && chrome.tabs.query(queryInfo, tabs => {
+      const currentTabId = tabs[0].id;
+      if (currentTabId) {
+        chrome.tabs.sendMessage(
+          currentTabId,
+          message,
+          (response) => {
+            setResponseFromContent(response);
+          });
+      }
+    });
+  };
 
   return (
     <div className="App">
@@ -52,6 +74,7 @@ function App() {
           Edit <code>src/App.tsx</code> and save to reload.
         </p>
         <button onClick={sendTestMessage}>SEND MESSAGE</button>
+        <button onClick={sendAPITestMsg}>Api Test</button>
         <p>
           {responseFromContent}
         </p>

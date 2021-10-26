@@ -1,4 +1,5 @@
 import { ChromeMessage, Sender } from "../types";
+import HackerNews from './hn-api';
 
 const messagesFromReactAppListener = (
     message: ChromeMessage,
@@ -17,6 +18,16 @@ const messagesFromReactAppListener = (
         document.querySelectorAll('.titlelink').forEach(el => {
             el.setAttribute("style", "color: red");
         });
+    }
+    else if (
+        sender.id === chrome.runtime.id &&
+        message.from === Sender.React &&
+        message.message === 'APITest') {
+        HackerNews.getStories(HackerNews.TYPE_TOP, 0, 5)
+            .then((stories:any) => {
+                let i = 1;
+                stories.forEach((story:any) => console.log(`${i++}. ${story.title} [${story.score}] (${story.url})}`))
+            });
     }
 }
 
