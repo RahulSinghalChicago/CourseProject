@@ -1,0 +1,30 @@
+{
+  "name": "HN Jobs",
+  "description": "Hacker News Jobs Extension",
+  "icons": {
+    "16": "logo192.png",
+    "48": "logo192.png",
+    "128": "logo192.png"
+  },
+  "action": {
+    "default_popup": "index.html",
+    "default_title": "Hacker News Jobs"
+  },
+  "manifest_version": 3,
+  "version": "1.0",
+  "host_permissions": [
+    "https://news.ycombinator.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://news.ycombinator.com/*"
+      ],
+      "js": [
+        "./static/js/content.js"
+      ],
+      "all_frames": false,
+      "run_at": "document_end"
+    }
+  ]
+}
