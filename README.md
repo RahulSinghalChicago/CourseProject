@@ -21,3 +21,6 @@ To test the install, go to [Hacker News](https://news.ycombinator.com), then ope
 The main files are `hacker-news-jobs/src/App.tsx` and `hacker-news-jobs/src/chrome/content.ts`. `App.tsx` is a pop-up defined using the framework React. We can define our user form there. It has a simple button that communicates with the `content.ts` script, which gets loaded into the Hacker News page. The file `content.ts` listens for a message from the extension and executes a function. There's other options for also running a background script. The `hacker-news-jobs/manifest.json` file provides the extension information for Chrome. It identifies what file should get treated as the extension pop-up vs injected into specific pages.
 
 The `.ts` file extension means a file is [TypeScript](https://www.typescriptlang.org/). The buid process transpiles TypeScript to JavaScript that the browser can understand. It will also convert React components to elements the browser can handle.
+
+[HN API guide](https://github.com/HackerNews/API)
+[HN API framework code](https://github.com/karpour/hackernews-api-ts)
