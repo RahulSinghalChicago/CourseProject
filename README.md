@@ -23,4 +23,5 @@ The main files are `hacker-news-jobs/src/App.tsx` and `hacker-news-jobs/src/chro
 The `.ts` file extension means a file is [TypeScript](https://www.typescriptlang.org/). The buid process transpiles TypeScript to JavaScript that the browser can understand. It will also convert React components to elements the browser can handle.
 
 [HN API guide](https://github.com/HackerNews/API)
+
 [HN API framework code](https://github.com/karpour/hackernews-api-ts)
