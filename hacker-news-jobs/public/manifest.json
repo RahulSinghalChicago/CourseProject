@@ -6,10 +6,25 @@
     "48": "logo192.png",
     "128": "logo192.png"
   },
-  "browser_action": {
+  "action": {
     "default_popup": "index.html",
     "default_title": "Hacker News Jobs"
   },
-  "manifest_version": 2,
-  "version": "1.0"
+  "manifest_version": 3,
+  "version": "1.0",
+  "host_permissions": [
+    "https://news.ycombinator.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://news.ycombinator.com/*"
+      ],
+      "js": [
+        "./static/js/content.js"
+      ],
+      "all_frames": false,
+      "run_at": "document_end"
+    }
+  ]
 }
