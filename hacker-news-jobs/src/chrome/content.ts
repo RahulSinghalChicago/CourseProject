@@ -31,12 +31,6 @@ const messagesFromReactAppListener = (
     message: ChromeMessage,
     sender: chrome.runtime.MessageSender
 ) => {
-    // Updating DOM to prove that message is received after loading new tab
-    // console.log only shows messages if console is open at the time
-    document.querySelectorAll('.titlelink').forEach(el => {
-        el.setAttribute("style", "color: red");
-    });
-
     console.log('[content.js]. Message received', {
         message,
         sender,
