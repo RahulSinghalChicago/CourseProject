@@ -1,4 +1,4 @@
-import { ChromeMessage, Sender } from "../types";
+import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
 import HackerNewsItem from './hn-api';
 
@@ -29,40 +29,29 @@ async function getComments(storyId: number, truncate: boolean) {
 
 const messagesFromReactAppListener = (
     message: ChromeMessage,
-    sender: chrome.runtime.MessageSender,
-    response: (message?: any) => void
+    sender: chrome.runtime.MessageSender
 ) => {
+    // Updating DOM to prove that message is received after loading new tab
+    // console.log only shows messages if console is open at the time
+    document.querySelectorAll('.titlelink').forEach(el => {
+        el.setAttribute("style", "color: red");
+    });
+
     console.log('[content.js]. Message received', {
         message,
         sender,
     })
 
-    if (
-        sender.id === chrome.runtime.id &&
-        message.from === Sender.React &&
-        message.message === 'Hello from React') {
-        document.querySelectorAll('.titlelink').forEach(el => {
-            el.setAttribute("style", "color: red");
-        });
-    }
-    else if (
-        sender.id === chrome.runtime.id &&
-        message.from === Sender.React &&
-        message.message === 'APITest') {
-
-        // HackerNews.getStories(HackerNews.TYPE_TOP, 0, 5)
-        //     .then((stories: any) => {
-        //         let i = 1;
-        //         stories.forEach((story: any) => console.log(`${i++}. ${story.title} [${story.score}] (${story.url})}`))
-        //     });
-
-        const nov2021WhoIsHiringId = 29067493
-        // TRUNCATE kidIds for testing
-        const truncate = true
-        getComments(nov2021WhoIsHiringId, truncate)
-            .then((jobPostings) => {
-                console.log(jobPostings)
-            })
+    if (message.messageType == MessageType.JobSearch) {
+        const storyParams = new URLSearchParams(window.location.search)
+        const storyId = storyParams.get('id');
+        if (storyId) {
+            const truncate = true
+            getComments(parseInt(storyId, 10), truncate)
+                .then((jobPostings) => {
+                    console.log(jobPostings)
+                })
+        }
     }
 }
 
