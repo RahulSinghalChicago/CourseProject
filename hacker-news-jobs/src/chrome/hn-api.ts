@@ -68,7 +68,7 @@ export interface HackerNewsUser {
     /** The user's optional self-description. HTML. */
     about: string,
     /** List of the user's stories, polls and comments. */
-    submitted: Array<string>,
+    submitted: Array<number>,
 }
 
 export default abstract class HackerNews {
