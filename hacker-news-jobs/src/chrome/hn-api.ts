@@ -4,6 +4,10 @@ const fetch = require('node-fetch');
 
 const apiUrl = 'https://hacker-news.firebaseio.com/v0/';
 
+const baseHackerNewsPage = 'https://news.ycombinator.com';
+
+const whoIsHiringUser = 'whoishiring';
+
 /** Unique ID of a Hacker News item, positive integer */
 export type HackerNewsItemId = number;
 /** Unique ID of a Hacker News user, alphanumeric */
@@ -64,7 +68,7 @@ export interface HackerNewsUser {
     /** The user's optional self-description. HTML. */
     about: string,
     /** List of the user's stories, polls and comments. */
-    submitted: number,
+    submitted: Array<number>,
 }
 
 export default abstract class HackerNews {
@@ -83,8 +87,8 @@ export default abstract class HackerNews {
      */
     public static getItem(item: HackerNewsItemId): Promise<HackerNewsItem | null> {
         return fetch(`${apiUrl}/item/${item}.json`)
-            .then((res:any) => res.json())
-            .then((resjson:any) => resjson as HackerNewsItem);
+            .then((res: any) => res.json())
+            .then((resjson: any) => resjson as HackerNewsItem);
     }
 
     /**
@@ -93,8 +97,8 @@ export default abstract class HackerNews {
      */
     public static getUser(userId: HackerNewsUserId): Promise<HackerNewsUser | null> {
         return fetch(`${apiUrl}/user/${userId}.json`)
-            .then((res:any) => res.json())
-            .then((resjson:any) => resjson as HackerNewsUser);
+            .then((res: any) => res.json())
+            .then((resjson: any) => resjson as HackerNewsUser);
     }
 
     /**
@@ -103,8 +107,8 @@ export default abstract class HackerNews {
      */
     public static getMaxItemId(): Promise<HackerNewsItemId> {
         return fetch(`${apiUrl}/maxitem.json`)
-            .then((res:any) => res.json())
-            .then((resjson:any) => resjson as HackerNewsItemId);
+            .then((res: any) => res.json())
+            .then((resjson: any) => resjson as HackerNewsItemId);
     };
 
     /**
@@ -126,7 +130,7 @@ export default abstract class HackerNews {
 
     /**
      * Get stories
-     * @param offset offset, with 0 being the newest story 
+     * @param offset offset, with 0 being the newest story
      * @param amount Default: 10, amount of stories to return from offset on.
      * @returns Promise which resolves with an array of {@link HackerNewsItem}
      */
@@ -144,7 +148,7 @@ export default abstract class HackerNews {
 
     /**
      * Get stories
-     * @param offset offset, with 0 being the newest story 
+     * @param offset offset, with 0 being the newest story
      * @param amount Default: 10, amount of stories to return from offset on.
      * @returns Promise which resolves with an array of {@link HackerNewsItem}
      */
@@ -162,7 +166,7 @@ export default abstract class HackerNews {
 
     /**
      * Get stories
-     * @param offset offset, with 0 being the newest story 
+     * @param offset offset, with 0 being the newest story
      * @param amount Default: 10, amount of stories to return from offset on.
      * @returns Promise which resolves with an array of {@link HackerNewsItem}
      */
@@ -180,7 +184,7 @@ export default abstract class HackerNews {
 
     /**
      * Get stories
-     * @param offset offset, with 0 being the newest story 
+     * @param offset offset, with 0 being the newest story
      * @param amount Default: 10, amount of stories to return from offset on.
      * @returns Promise which resolves with an array of {@link HackerNewsItem}
      */
@@ -198,7 +202,7 @@ export default abstract class HackerNews {
 
     /**
      * Get stories
-     * @param offset offset, with 0 being the newest story 
+     * @param offset offset, with 0 being the newest story
      * @param amount Default: 10, amount of stories to return from offset on.
      * @returns Promise which resolves with an array of {@link HackerNewsItem}
      */
@@ -216,7 +220,7 @@ export default abstract class HackerNews {
 
     /**
      * Get stories
-     * @param offset offset, with 0 being the newest story 
+     * @param offset offset, with 0 being the newest story
      * @param amount Default: 10, amount of stories to return from offset on.
      * @returns Promise which resolves with an array of {@link HackerNewsItem}
      */
@@ -230,8 +234,8 @@ export default abstract class HackerNews {
      */
     public static getUpdates(): Promise<{ items: HackerNewsItemId[], profiles: HackerNewsUserId[]; }> {
         return fetch(`${apiUrl}/updates.json`)
-            .then((res:any) => res.json())
-            .then((resjson:any) => resjson as { items: HackerNewsItemId[], profiles: HackerNewsUserId[]; });
+            .then((res: any) => res.json())
+            .then((resjson: any) => resjson as { items: HackerNewsItemId[], profiles: HackerNewsUserId[]; });
     };
 
     /**
@@ -241,8 +245,8 @@ export default abstract class HackerNews {
      */
     public static getStoryIds(type: HackerNewsStoryType): Promise<HackerNewsItemId[]> {
         return fetch(`${apiUrl}/${type}stories.json`)
-            .then((res:any) => res.json())
-            .then((resjson:any) => resjson as HackerNewsItemId[]);
+            .then((res: any) => res.json())
+            .then((resjson: any) => resjson as HackerNewsItemId[]);
     }
 
     /**
@@ -258,5 +262,24 @@ export default abstract class HackerNews {
                 if (amount) storyIds = storyIds.slice(Math.min(offset, storyIds.length - 1), Math.min(offset + amount, storyIds.length - 1));
                 return Promise.all(storyIds.map(storyId => this.getItem(storyId) as unknown as HackerNewsItem));
             });
+    }
+
+    /**
+     * Identify the url of the latest whoishiring post
+     * @returns The latest jobs url
+     */
+    public static getLatestJobsPage(): Promise<string> {
+        return this.getUser(whoIsHiringUser)
+            .then((profile: HackerNewsUser | null) => {
+                if (profile) {
+                    if (profile.submitted.length > 0) {
+                        let latestStoryId = profile.submitted[0];
+                        if (latestStoryId) {
+                            return `${baseHackerNewsPage}/item?id=${latestStoryId}`;
+                        }
+                    }
+                }
+                return '';
+            })
     }
 }

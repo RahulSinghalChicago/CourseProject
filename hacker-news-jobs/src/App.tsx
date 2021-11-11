@@ -1,92 +1,75 @@
 import React, { useState } from 'react';
-import logo from './logo.svg';
+
 import './App.css';
-import { ChromeMessage, Sender } from "./types";
+import { ChromeMessage, MessageType, Sender } from "./types";
+import HackerNews from './chrome/hn-api';
+
 
 function App() {
-  const [responseFromContent, setResponseFromContent] = useState<string>('');
+  const [searchText, setSearchText] = useState<string>('');
 
   /**
-     * Send message to the content script
-     */
-  const sendTestMessage = () => {
-    const message: ChromeMessage = {
-      from: Sender.React,
-      message: "Hello from React",
+   * Send message to the content script
+   * @param e The form event object on submission
+   */
+  const searchHNJobs = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (chrome.tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs: Array<chrome.tabs.Tab>) => {
+        HackerNews.getLatestJobsPage()
+          .then((jobsUrl: string) => {
+            if (tabs.length > 0 && tabs[0].url == jobsUrl) {
+              return Promise.resolve(tabs[0]);
+            }
+
+            return new Promise<chrome.tabs.Tab>((resolve) => {
+              chrome.tabs.create({ url: jobsUrl, active: false })
+                .then((tab: chrome.tabs.Tab) => {
+                  const listener = (
+                    tabId: number,
+                    changeInfo: chrome.tabs.TabChangeInfo,
+                    updatedTab: chrome.tabs.Tab
+                  ) => {
+                    if (tabId === tab.id && changeInfo.status == 'complete') {
+                      resolve(tab)
+                      chrome.tabs.onUpdated.removeListener(listener);
+                    }
+                  };
+                  chrome.tabs.onUpdated.addListener(listener);
+                });
+            });
+          })
+          .then((tab: chrome.tabs.Tab) => {
+            const message: ChromeMessage = {
+              from: Sender.React,
+              messageType: MessageType.JobSearch,
+              message: searchText
+            }
+
+            if (tab.id) {
+              chrome.tabs.sendMessage(tab.id, message);
+              if (!tab.active) {
+                chrome.tabs.update(tab.id, { active: true });
+              }
+            }
+          })
+      })
     }
-
-    const queryInfo: chrome.tabs.QueryInfo = {
-      active: true,
-      currentWindow: true
-    };
-
-    /**
-     * We can't use "chrome.runtime.sendMessage" for sending messages from React.
-     * For sending messages from React we need to specify which tab to send it to.
-     */
-    chrome.tabs && chrome.tabs.query(queryInfo, tabs => {
-      const currentTabId = tabs[0].id;
-      /**
-       * Sends a single message to the content script(s) in the specified tab,
-       * with an optional callback to run when a response is sent back.
-       *
-       * The runtime.onMessage event is fired in each content script running
-       * in the specified tab for the current extension.
-       */
-      if (currentTabId) {
-        chrome.tabs.sendMessage(
-          currentTabId,
-          message,
-          (response) => {
-            setResponseFromContent(response);
-          });
-      }
-    });
-  };
-  const sendAPITestMsg = () => {
-    const message: ChromeMessage = {
-      from: Sender.React,
-      message: "APITest",
-    }
-
-    const queryInfo: chrome.tabs.QueryInfo = {
-      active: true,
-      currentWindow: true
-    };
-    chrome.tabs && chrome.tabs.query(queryInfo, tabs => {
-      const currentTabId = tabs[0].id;
-      if (currentTabId) {
-        chrome.tabs.sendMessage(
-          currentTabId,
-          message,
-          (response) => {
-            setResponseFromContent(response);
-          });
-      }
-    });
   };
 
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <button onClick={sendTestMessage}>SEND MESSAGE</button>
-        <button onClick={sendAPITestMsg}>Api Test</button>
-        <p>
-          {responseFromContent}
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <form className="App-header" onSubmit={searchHNJobs}>
+        <h3>Hacker News Jobs</h3>
+        <input
+          type="text"
+          value={searchText}
+          onChange={e => setSearchText(e.target.value)}
+          placeholder="job keywords"
+        />
+        <button type="submit">Search</button>
+      </form>
     </div>
   );
 }

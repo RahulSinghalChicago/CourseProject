@@ -3,7 +3,12 @@ export enum Sender {
     Content
 }
 
+export enum MessageType {
+    JobSearch
+}
+
 export interface ChromeMessage {
     from: Sender,
-    message: any
+    messageType: MessageType,
+    message: string
 }
