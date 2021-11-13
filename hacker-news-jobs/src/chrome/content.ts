@@ -45,10 +45,22 @@ const messagesFromReactAppListener = (
             const truncate = true
             getComments(parseInt(storyId, 10), truncate)
                 .then((jobPostings) => {
-                    console.log(jobPostings)
+                    if (!jobPostings) {
+                        return [];
+                    }
+                    console.log(jobPostings);
+                    const rankedJobIds: Array<number> = [];
+                    jobPostings.forEach((jobPosting) => {
+                        if (jobPosting && !jobPosting.deleted) {
+                            rankedJobIds.push(jobPosting.id);
+                        }
+                    });
+                    // Randomly sort the results for now
+                    return rankedJobIds.sort((a, b) => 0.5 - Math.random())
                 })
-                .then(() => {
-                    sortJobPostings([1, 2, 3]);
+                .then((rankedJobIds) => {
+                    console.log(rankedJobIds);
+                    sortJobPostings(rankedJobIds);
                 });
         }
         removeLoading()
