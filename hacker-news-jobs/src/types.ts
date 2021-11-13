@@ -4,7 +4,8 @@ export enum Sender {
 }
 
 export enum MessageType {
-    JobSearch
+    JobSearch,
+    WinkTest
 }
 
 export interface ChromeMessage {

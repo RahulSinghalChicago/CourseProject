@@ -1,6 +1,7 @@
 import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
-import HackerNewsItem from './hn-api';
+// import HackerNewsItem from './hn-api';
+import runWinkTest from "../WinkEngine";
 
 async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
     try {
@@ -36,7 +37,7 @@ const messagesFromReactAppListener = (
         sender,
     })
 
-    if (message.messageType == MessageType.JobSearch) {
+    if (message.messageType === MessageType.JobSearch) {
         const storyParams = new URLSearchParams(window.location.search)
         const storyId = storyParams.get('id');
         if (storyId) {
@@ -46,6 +47,9 @@ const messagesFromReactAppListener = (
                     console.log(jobPostings)
                 })
         }
+    }
+    else if (message.messageType === MessageType.WinkTest) {
+        runWinkTest();
     }
 }
 
