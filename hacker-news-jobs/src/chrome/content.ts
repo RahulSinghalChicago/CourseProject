@@ -1,7 +1,7 @@
 import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
 import HackerNewsItem from './hn-api';
-import { sortJobPostings } from './job-postings';
+import { removeLoading, setLoading, sortJobPostings } from './job-postings';
 
 async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
     try {
@@ -38,6 +38,7 @@ const messagesFromReactAppListener = (
     })
 
     if (message.messageType == MessageType.JobSearch) {
+        setLoading()
         const storyParams = new URLSearchParams(window.location.search)
         const storyId = storyParams.get('id');
         if (storyId) {
@@ -50,6 +51,7 @@ const messagesFromReactAppListener = (
                     sortJobPostings([1, 2, 3]);
                 });
         }
+        removeLoading()
     }
 }
 
