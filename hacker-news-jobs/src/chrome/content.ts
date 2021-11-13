@@ -1,7 +1,7 @@
 import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
 import HackerNewsItem from './hn-api';
-import { removeLoading, setLoading, sortJobPostings } from './job-postings';
+import jobPostingsSorter from './job-postings';
 
 async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
     try {
@@ -38,7 +38,16 @@ const messagesFromReactAppListener = (
     })
 
     if (message.messageType == MessageType.JobSearch) {
-        setLoading()
+        jobPostingsSorter.setLoading()
+
+        // Reset the view on an empty search
+        if (message.message === '') {
+            jobPostingsSorter.reset();
+            jobPostingsSorter.removeLoading();
+            return;
+        }
+
+        // Otherwise, fetch and sort
         const storyParams = new URLSearchParams(window.location.search)
         const storyId = storyParams.get('id');
         if (storyId) {
@@ -60,10 +69,11 @@ const messagesFromReactAppListener = (
                 })
                 .then((rankedJobIds) => {
                     console.log(rankedJobIds);
-                    sortJobPostings(rankedJobIds);
+                    jobPostingsSorter.sort(rankedJobIds);
                 });
         }
-        removeLoading()
+
+        jobPostingsSorter.removeLoading()
     }
 }
 
