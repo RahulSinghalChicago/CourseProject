@@ -37,7 +37,7 @@ export const sortJobPostings = (rankedJobIds: Array<number>) => {
   const sortedRows: Array<HTMLTableRowElement> = [];
   oldTBody.remove();
 
-  // Create a map of postings by id along with their children
+  // Create a map of postings by id along with their children to lookup postings easily
   const rowsById: JobPostingsById = {};
   let currentParentId: number;
   tableRows.forEach((row) => {
@@ -60,8 +60,12 @@ export const sortJobPostings = (rankedJobIds: Array<number>) => {
     }
   });
 
-  // Create sorted list of postings
+  // Create sorted list of displayed postings
   rankedJobIds.forEach((postingId) => {
+    if (!rowsById[postingId]) {
+      return;
+    }
+
     sortedRows.push(rowsById[postingId].row);
     rowsById[postingId].children.forEach((childPost) => {
       sortedRows.push(childPost);
