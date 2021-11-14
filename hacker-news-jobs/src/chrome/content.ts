@@ -60,20 +60,9 @@ const messagesFromReactAppListener = (
                         return [];
                     }
                     console.log(jobPostings);
-                    const rankedJobIds: Array<number> = [];
-                    jobPostings.forEach((jobPosting) => {
-                        if (jobPosting && !jobPosting.deleted) {
-                            rankedJobIds.push(jobPosting.id);
-                        }
-                    });
-
-                    bm25Search(jobPostings)
-                    console.log(jobPostings)
-
-                    // Randomly sort the results for now
-                    return rankedJobIds.sort((a, b) => 0.5 - Math.random())
+                    return bm25Search(jobPostings, message.message);
                 })
-                .then((rankedJobIds) => {
+                .then((rankedJobIds: Array<number>) => {
                     console.log(rankedJobIds);
                     jobPostingsSorter.sort(rankedJobIds);
                 });
