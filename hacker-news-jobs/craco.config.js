@@ -15,6 +15,11 @@ module.exports = {
                 optimization: {
                     ...webpackConfig.optimization,
                     runtimeChunk: false,
+                    splitChunks: {
+                        chunks(chunk) {
+                            return false
+                        },
+                    },
                 }
             }
         },

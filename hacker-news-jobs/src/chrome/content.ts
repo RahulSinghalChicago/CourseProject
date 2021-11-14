@@ -1,6 +1,7 @@
 import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
 import HackerNewsItem from './hn-api';
+import bm25Search from './bm25-search';
 
 async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
     try {
@@ -43,6 +44,7 @@ const messagesFromReactAppListener = (
             const truncate = true
             getComments(parseInt(storyId, 10), truncate)
                 .then((jobPostings) => {
+                    bm25Search(jobPostings)
                     console.log(jobPostings)
                 })
         }
