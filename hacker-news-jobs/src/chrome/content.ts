@@ -2,6 +2,8 @@ import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
 import HackerNewsItem from './hn-api';
 import jobPostingsSorter from './job-postings';
+import bm25Search from './bm25-search';
+
 
 async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
     try {
@@ -64,6 +66,10 @@ const messagesFromReactAppListener = (
                             rankedJobIds.push(jobPosting.id);
                         }
                     });
+
+                    bm25Search(jobPostings)
+                    console.log(jobPostings)
+
                     // Randomly sort the results for now
                     return rankedJobIds.sort((a, b) => 0.5 - Math.random())
                 })
