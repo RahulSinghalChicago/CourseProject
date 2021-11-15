@@ -5,7 +5,7 @@
 var bm25 = require('wink-bm25-text-search');
 
 // Load sample data (load any other JSON data instead of sample)
-var docs = require('wink-bm25-text-search/sample-data/demo-data-for-wink-bm25.json');
+// var docs = require('wink-bm25-text-search/sample-data/demo-data-for-wink-bm25.json');
 const winkNLP = require('wink-nlp');
 // Use web model
 const model = require('wink-eng-lite-web-model');
