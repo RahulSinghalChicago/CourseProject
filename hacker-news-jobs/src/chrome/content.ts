@@ -38,7 +38,7 @@ const messagesFromReactAppListener = (
         sender,
     })
 
-    if (message.messageType == MessageType.JobSearch) {
+    if (message.messageType === MessageType.JobSearch) {
         jobPostingsSorter.setLoading()
 
         // Reset the view on an empty search
