@@ -3,9 +3,6 @@
 /* eslint no-console: 0 */
 // Load wink-bm25-text-search
 var bm25 = require('wink-bm25-text-search');
-
-// Load sample data (load any other JSON data instead of sample)
-var docs = require('wink-bm25-text-search/sample-data/demo-data-for-wink-bm25.json');
 const winkNLP = require('wink-nlp');
 // Use web model
 const model = require('wink-eng-lite-web-model');
@@ -13,7 +10,8 @@ const model = require('wink-eng-lite-web-model');
 const nlp = winkNLP(model);
 const its = nlp.its;
 
-export default function bm25Search(jobPostings, query = "machine learning") {
+
+function bm25Search(jobPostings, query = "machine learning") {
 
   //console.log(jobPostings)
   //console.log(query)
@@ -32,26 +30,29 @@ export default function bm25Search(jobPostings, query = "machine learning") {
     return tokens;
   };
 
-  // Create search engine's instance
-  var engine = bm25();
+  if (!engine) {
+    // Create search engine's instance
+    var engine = bm25();
 
-  // Step I: Define config
-  engine.defineConfig({ fldWeights: { text: 1 } });
+    // Step I: Define config
+    engine.defineConfig({ fldWeights: { text: 1 } });
 
-  // Step II: Define PrepTasks pipe.
-  engine.definePrepTasks([prepTask]);
+    // Step II: Define PrepTasks pipe.
+    engine.definePrepTasks([prepTask]);
 
-  // Step III: Add Docs
-  jobPostings.forEach(function (doc) {
-    // Note, 'i' becomes the unique id for 'doc'
-    if ("deleted" in doc) {
-      //pass
-    } else
-      engine.addDoc(doc, doc.id);
-  });
+    // Step III: Add Docs
+    jobPostings.forEach(function (doc) {
+      if (doc !== null) {
+        if ("deleted" in doc) {
+          //pass
+        } else
+          engine.addDoc(doc, doc.id);
+      }
+    });
 
-  // Step IV: Consolidate
-  engine.consolidate();
+    // Step IV: Consolidate
+    engine.consolidate();
+  }
 
   // All set, start searching!
   // `results` is an array of [ doc-id, score ], sorted by score
@@ -64,4 +65,8 @@ export default function bm25Search(jobPostings, query = "machine learning") {
   });
 
   return sortedIds;
+
 }
+
+export { bm25Search }
+
