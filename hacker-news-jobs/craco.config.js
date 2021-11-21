@@ -20,7 +20,8 @@ module.exports = {
                             return false
                         },
                     },
-                }
+                },
+                devtool: 'inline-source-map'
             }
         },
     }

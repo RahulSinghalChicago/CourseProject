@@ -1,6 +1,5 @@
 import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
-import HackerNewsItem from './hn-api';
 import jobPostingsSorter from './job-postings';
 import { bm25Search } from './bm25-search';
 
@@ -39,7 +38,7 @@ const messagesFromReactAppListener = (
         sender,
     })
 
-    if (message.messageType == MessageType.JobSearch) {
+    if (message.messageType === MessageType.JobSearch) {
         jobPostingsSorter.setLoading()
 
         // Reset the view on an empty search

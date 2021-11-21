@@ -19,7 +19,7 @@ function App() {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs: Array<chrome.tabs.Tab>) => {
         HackerNews.getLatestJobsPage()
           .then((jobsUrl: string) => {
-            if (tabs.length > 0 && tabs[0].url == jobsUrl) {
+            if (tabs.length > 0 && tabs[0].url === jobsUrl) {
               return Promise.resolve(tabs[0]);
             }
 
@@ -31,7 +31,7 @@ function App() {
                     changeInfo: chrome.tabs.TabChangeInfo,
                     updatedTab: chrome.tabs.Tab
                   ) => {
-                    if (tabId === tab.id && changeInfo.status == 'complete') {
+                    if (tabId === tab.id && changeInfo.status === 'complete') {
                       resolve(tab)
                       chrome.tabs.onUpdated.removeListener(listener);
                     }
