@@ -19,7 +19,7 @@ function App() {
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs: Array<chrome.tabs.Tab>) => {
         HackerNews.getLatestJobsPage()
           .then((jobsUrl: string) => {
-            if (tabs.length > 0 && tabs[0].url === jobsUrl) {
+            if (tabs.length > 0 && tabs[0].url && tabs[0].url.includes(jobsUrl)) {
               return Promise.resolve(tabs[0]);
             }
 
