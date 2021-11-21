@@ -12,9 +12,17 @@ class JobPostingsSorter {
   postingsTable: HTMLTableElement;
   originalPostings: Array<HTMLTableRowElement>;
   rowsById: JobPostingsById;
+  lastRowId: number;
 
   constructor() {
     this.postingsTable = document.querySelector('table.comment-tree') as HTMLTableElement;
+    this.originalPostings = [];
+    this.rowsById = {};
+    this.lastRowId = 0;
+    if (!this.postingsTable) {
+      return;
+    }
+
     this.originalPostings = []
     this.rowsById = this.getRowsById();
     const currentTBody = this.postingsTable.querySelector('tbody') as HTMLTableSectionElement;
@@ -60,7 +68,7 @@ class JobPostingsSorter {
 
     // Create a map of postings by id along with their children to lookup postings easily
     const rowsById: JobPostingsById = {};
-    let currentParentId: number;
+    let currentParentId: number = 0;
     tableRows.forEach((row) => {
       const postingId = parseInt(row.id, 10);
       const indentElement = row.querySelector('td.ind') as HTMLTableCellElement;
@@ -81,6 +89,7 @@ class JobPostingsSorter {
       }
     });
 
+    this.lastRowId = currentParentId;
     return rowsById;
   }
 

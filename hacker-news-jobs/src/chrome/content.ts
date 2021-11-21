@@ -15,7 +15,7 @@ async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
     }
 }
 
-async function getComments(storyId: number, truncate: boolean) {
+async function getComments(storyId: number, truncate: boolean, lastJobId: number) {
     return getKidIdsFromStory(storyId)
         .then(async (kidIds: number[] | null) => {
             if (!kidIds) {
@@ -24,7 +24,14 @@ async function getComments(storyId: number, truncate: boolean) {
             if (truncate) {
                 kidIds = kidIds.slice(0, 10);
             }
-            const all = kidIds.map(id => HackerNews.getItem(id))
+            const all = [];
+            for (let i = 0; i < kidIds.length; i++) {
+                all.push(HackerNews.getItem(kidIds[i]));
+                if (kidIds[i] === lastJobId) {
+                    break;
+                }
+            }
+
             return await Promise.all(all);
         });
 }
@@ -39,10 +46,9 @@ const messagesFromReactAppListener = (
     })
 
     if (message.messageType === MessageType.JobSearch) {
-        jobPostingsSorter.setLoading()
-
         // Reset the view on an empty search
         if (message.message === '') {
+            jobPostingsSorter.setLoading()
             jobPostingsSorter.reset();
             jobPostingsSorter.removeLoading();
             return;
@@ -52,8 +58,8 @@ const messagesFromReactAppListener = (
         const storyParams = new URLSearchParams(window.location.search)
         const storyId = storyParams.get('id');
         if (storyId) {
-            const truncate = false
-            getComments(parseInt(storyId, 10), truncate)
+            jobPostingsSorter.setLoading()
+            getComments(parseInt(storyId, 10), false, jobPostingsSorter.lastRowId)
                 .then((jobPostings) => {
                     if (!jobPostings) {
                         return [];
@@ -64,10 +70,9 @@ const messagesFromReactAppListener = (
                 .then((rankedJobIds: Array<number>) => {
                     console.log(rankedJobIds);
                     jobPostingsSorter.sort(rankedJobIds);
-                });
+                })
+                .then(() => jobPostingsSorter.removeLoading());
         }
-
-        jobPostingsSorter.removeLoading()
     }
 }
 
