@@ -7,41 +7,17 @@ import { bm25Search } from './bm25-search';
 let comments: Promise<(HackerNewsItem | null)[]>;
 
 
-async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
-    try {
-        return await HackerNews.getItem(storyId)
-            .then((item: any) => {
-                return item['kids']
-            });
-    } catch {
-        return null
-    }
-}
-
-async function getComments(storyId: number, truncate: boolean, lastJobId: number) {
+async function getComments(kidIds: Array<number>, truncate: boolean) {
     if (comments) {
         return comments;
     }
 
-    return getKidIdsFromStory(storyId)
-        .then(async (kidIds: number[] | null) => {
-            if (!kidIds) {
-                return null
-            }
-            if (truncate) {
-                kidIds = kidIds.slice(0, 10);
-            }
-            const all = [];
-            for (let i = 0; i < kidIds.length; i++) {
-                all.push(HackerNews.getItem(kidIds[i]));
-                if (kidIds[i] === lastJobId) {
-                    break;
-                }
-            }
+    if (truncate) {
+        kidIds = kidIds.slice(0, 10);
+    }
 
-            comments = Promise.all(all);
-            return await comments;
-        });
+    comments = Promise.all(kidIds.map((kidId) => HackerNews.getItem(kidId)));
+    return await comments;
 }
 
 const messagesFromReactAppListener = (
@@ -67,7 +43,9 @@ const messagesFromReactAppListener = (
         const storyId = storyParams.get('id');
         if (storyId) {
             jobPostingsSorter.setLoading()
-            getComments(parseInt(storyId, 10), false, jobPostingsSorter.lastRowId)
+            const kidIds = Object.keys(jobPostingsSorter.rowsById)
+                .map((kidId) => parseInt(kidId, 10));
+            getComments(kidIds, false)
                 .then((jobPostings) => {
                     if (!jobPostings) {
                         return [];
