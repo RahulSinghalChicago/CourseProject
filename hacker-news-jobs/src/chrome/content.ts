@@ -1,7 +1,10 @@
 import { ChromeMessage, MessageType } from "../types";
-import HackerNews from './hn-api';
+import HackerNews, { HackerNewsItem } from './hn-api';
 import jobPostingsSorter from './job-postings';
 import { bm25Search } from './bm25-search';
+
+
+let comments: Promise<(HackerNewsItem | null)[]>;
 
 
 async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
@@ -16,6 +19,10 @@ async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
 }
 
 async function getComments(storyId: number, truncate: boolean, lastJobId: number) {
+    if (comments) {
+        return comments;
+    }
+
     return getKidIdsFromStory(storyId)
         .then(async (kidIds: number[] | null) => {
             if (!kidIds) {
@@ -32,7 +39,8 @@ async function getComments(storyId: number, truncate: boolean, lastJobId: number
                 }
             }
 
-            return await Promise.all(all);
+            comments = Promise.all(all);
+            return await comments;
         });
 }
 
