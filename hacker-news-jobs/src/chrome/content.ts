@@ -1,7 +1,7 @@
 import { ChromeMessage, MessageType } from "../types";
 import HackerNews from './hn-api';
 import jobPostingsSorter from './job-postings';
-import bm25Search from './bm25-search';
+import { bm25Search } from './bm25-search';
 
 
 async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
@@ -52,7 +52,7 @@ const messagesFromReactAppListener = (
         const storyParams = new URLSearchParams(window.location.search)
         const storyId = storyParams.get('id');
         if (storyId) {
-            const truncate = true
+            const truncate = false
             getComments(parseInt(storyId, 10), truncate)
                 .then((jobPostings) => {
                     if (!jobPostings) {
