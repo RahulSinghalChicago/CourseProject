@@ -1,32 +1,23 @@
 import { ChromeMessage, MessageType } from "../types";
-import HackerNews from './hn-api';
+import HackerNews, { HackerNewsItem } from './hn-api';
 import jobPostingsSorter from './job-postings';
 import { bm25Search } from './bm25-search';
 
 
-async function getKidIdsFromStory(storyId: number): Promise<number[] | null> {
-    try {
-        return await HackerNews.getItem(storyId)
-            .then((item: any) => {
-                return item['kids']
-            });
-    } catch {
-        return null
-    }
-}
+let comments: Promise<(HackerNewsItem | null)[]>;
 
-async function getComments(storyId: number, truncate: boolean) {
-    return getKidIdsFromStory(storyId)
-        .then(async (kidIds: number[] | null) => {
-            if (!kidIds) {
-                return null
-            }
-            if (truncate) {
-                kidIds = kidIds.slice(0, 10);
-            }
-            const all = kidIds.map(id => HackerNews.getItem(id))
-            return await Promise.all(all);
-        });
+
+async function getComments(kidIds: Array<number>, truncate: boolean) {
+    if (comments) {
+        return comments;
+    }
+
+    if (truncate) {
+        kidIds = kidIds.slice(0, 10);
+    }
+
+    comments = Promise.all(kidIds.map((kidId) => HackerNews.getItem(kidId)));
+    return await comments;
 }
 
 const messagesFromReactAppListener = (
@@ -39,10 +30,9 @@ const messagesFromReactAppListener = (
     })
 
     if (message.messageType === MessageType.JobSearch) {
-        jobPostingsSorter.setLoading()
-
         // Reset the view on an empty search
         if (message.message === '') {
+            jobPostingsSorter.setLoading()
             jobPostingsSorter.reset();
             jobPostingsSorter.removeLoading();
             return;
@@ -52,8 +42,10 @@ const messagesFromReactAppListener = (
         const storyParams = new URLSearchParams(window.location.search)
         const storyId = storyParams.get('id');
         if (storyId) {
-            const truncate = false
-            getComments(parseInt(storyId, 10), truncate)
+            jobPostingsSorter.setLoading()
+            const kidIds = Object.keys(jobPostingsSorter.rowsById)
+                .map((kidId) => parseInt(kidId, 10));
+            getComments(kidIds, false)
                 .then((jobPostings) => {
                     if (!jobPostings) {
                         return [];
@@ -64,10 +56,9 @@ const messagesFromReactAppListener = (
                 .then((rankedJobIds: Array<number>) => {
                     console.log(rankedJobIds);
                     jobPostingsSorter.sort(rankedJobIds);
-                });
+                })
+                .then(() => jobPostingsSorter.removeLoading());
         }
-
-        jobPostingsSorter.removeLoading()
     }
 }
 

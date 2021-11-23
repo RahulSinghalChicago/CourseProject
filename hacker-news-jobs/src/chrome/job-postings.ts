@@ -4,6 +4,7 @@
 interface JobPostingsById {
   [key: number]: {
     row: HTMLTableRowElement,
+    originalOrder: number,
     children: Array<HTMLTableRowElement>
   }
 };
@@ -15,6 +16,12 @@ class JobPostingsSorter {
 
   constructor() {
     this.postingsTable = document.querySelector('table.comment-tree') as HTMLTableElement;
+    this.originalPostings = [];
+    this.rowsById = {};
+    if (!this.postingsTable) {
+      return;
+    }
+
     this.originalPostings = []
     this.rowsById = this.getRowsById();
     const currentTBody = this.postingsTable.querySelector('tbody') as HTMLTableSectionElement;
@@ -61,6 +68,7 @@ class JobPostingsSorter {
     // Create a map of postings by id along with their children to lookup postings easily
     const rowsById: JobPostingsById = {};
     let currentParentId: number;
+    let originalOrder: number = 1;
     tableRows.forEach((row) => {
       const postingId = parseInt(row.id, 10);
       const indentElement = row.querySelector('td.ind') as HTMLTableCellElement;
@@ -72,8 +80,11 @@ class JobPostingsSorter {
       if (!rowsById[postingId]) {
         rowsById[postingId] = {
           row: row,
+          originalOrder: originalOrder,
           children: []
         }
+
+        originalOrder++;
       }
 
       if (!isParent) {
@@ -96,18 +107,27 @@ class JobPostingsSorter {
     oldTBody.remove();
 
     // Create sorted list of displayed postings
-    rankedJobIds.forEach((postingId) => {
+    console.log('Ranked output from search')
+    rankedJobIds.forEach((postingId, i) => {
       if (!this.rowsById[postingId]) {
         return;
       }
 
-      sortedRows.push(this.rowsById[postingId].row);
-      this.rowsById[postingId].children.forEach((childPost) => {
+      const { originalOrder, row, children } = this.rowsById[postingId];
+      const comment = row.querySelector('.comment');
+      const content = comment && comment.textContent?.trim();
+      sortedRows.push(row);
+      console.log({
+        postId: postingId,
+        originalOrder: originalOrder,
+        newOrder: i + 1,
+        text: content
+      });
+
+      children.forEach((childPost) => {
         sortedRows.push(childPost);
       });
     });
-
-    console.log(sortedRows);
 
     // Insert new tbody with sorted rows into DOM
     newTBody.append(...sortedRows);
