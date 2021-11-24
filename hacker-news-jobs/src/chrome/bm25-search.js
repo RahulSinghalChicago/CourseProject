@@ -40,6 +40,11 @@ function bm25Search(jobPostings, query = "machine learning") {
     // Step II: Define PrepTasks pipe.
     engine.definePrepTasks([prepTask]);
 
+    // Remove duplicate items
+    jobPostings = jobPostings.filter((arr, index, self) =>
+        index === self.findIndex((t) => 
+            (t.text === arr.text )))
+
     // Step III: Add Docs
     jobPostings.forEach(function (doc) {
       if (doc !== null) {
