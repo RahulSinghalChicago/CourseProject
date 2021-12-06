@@ -6,30 +6,29 @@ var bm25 = require('wink-bm25-text-search');
 const winkNLP = require('wink-nlp');
 // Use web model
 const model = require('wink-eng-lite-web-model');
+const nlpUtils = require('wink-nlp-utils');
+const getSpottedTerms = require('wink-bm25-text-search/runkit/get-spotted-terms.js');
 // Load wink nlp and its model
 const nlp = winkNLP(model);
 const its = nlp.its;
 
+const pipe = [
+  nlpUtils.string.lowerCase,
+  nlpUtils.string.tokenize0,
+  nlpUtils.tokens.removeWords,
+  nlpUtils.tokens.stem,
+  nlpUtils.tokens.propagateNegations
+];
+
+function highlightTerms(body, spotted) {
+  spotted.forEach(function (term) {
+    var r = new RegExp('\\W(' + term + ')\\W', 'ig');
+    body = body.replace(r, ' <mark>$1</mark> ');
+  })
+  return body;
+}
 
 function bm25Search(jobPostings, query = "machine learning") {
-
-  //console.log(jobPostings)
-  //console.log(query)
-  //console.log(jobPostings[0]["id"])
-  //console.log(jobPostings[0]["text"])
-
-  const prepTask = function (text) {
-    const tokens = [];
-    nlp.readDoc(text)
-      .tokens()
-      // Use only words ignoring punctuations etc and from them remove stop words
-      .filter((t) => (t.out(its.type) === 'word' && !t.out(its.stopWordFlag)))
-      // Handle negation and extract stem of the word
-      .each((t) => tokens.push((t.out(its.negationFlag)) ? '!' + t.out(its.stem) : t.out(its.stem)));
-
-    return tokens;
-  };
-
   if (!engine) {
     // Create search engine's instance
     var engine = bm25();
@@ -38,20 +37,21 @@ function bm25Search(jobPostings, query = "machine learning") {
     engine.defineConfig({ fldWeights: { text: 1 } });
 
     // Step II: Define PrepTasks pipe.
-    engine.definePrepTasks([prepTask]);
+    engine.definePrepTasks(pipe);
 
     // Remove duplicate items
     jobPostings = jobPostings.filter((arr, index, self) =>
-        index === self.findIndex((t) => 
-            (t.text === arr.text )))
+      index === self.findIndex((t) =>
+        (t.text === arr.text)))
 
     // Step III: Add Docs
     jobPostings.forEach(function (doc) {
       if (doc !== null) {
         if ("deleted" in doc) {
           //pass
-        } else
+        } else {
           engine.addDoc(doc, doc.id);
+        }
       }
     });
 
@@ -59,17 +59,26 @@ function bm25Search(jobPostings, query = "machine learning") {
     engine.consolidate();
   }
 
+  const jobPostingsById = {};
+  jobPostings.forEach(function (doc) {
+    jobPostingsById[doc.id] = doc;
+  });
+
   // All set, start searching!
   // `results` is an array of [ doc-id, score ], sorted by score
   var results = engine.search(query);
   console.log('%d entries found.', results.length);
-  const sortedIds = [];
+  const sortedResults = [];
+  const spotted = getSpottedTerms(results, query, jobPostingsById, ['text'], pipe, 3);
   results.forEach(function (pair) {
-    console.log("Score: ", pair[1], " Posting Id: ", pair[0])
-    sortedIds.push(pair[0]);
+    console.log("Score: ", pair[1], " Posting Id: ", pair[0]);
+    sortedResults.push({
+      id: pair[0],
+      text: highlightTerms(jobPostingsById[pair[0]].text, spotted)
+    });
   });
 
-  return sortedIds;
+  return sortedResults;
 
 }
 

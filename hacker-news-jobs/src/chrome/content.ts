@@ -1,6 +1,6 @@
 import { ChromeMessage, MessageType } from "../types";
 import HackerNews, { HackerNewsItem } from './hn-api';
-import jobPostingsSorter from './job-postings';
+import jobPostingsSorter, { JobSearchResult } from './job-postings';
 import { bm25Search } from './bm25-search';
 
 
@@ -53,9 +53,8 @@ const messagesFromReactAppListener = (
                     console.log(jobPostings);
                     return bm25Search(jobPostings, message.message);
                 })
-                .then((rankedJobIds: Array<number>) => {
-                    console.log(rankedJobIds);
-                    jobPostingsSorter.sort(rankedJobIds);
+                .then((rankedJobs: Array<JobSearchResult>) => {
+                    jobPostingsSorter.sort(rankedJobs);
                 })
                 .then(() => jobPostingsSorter.removeLoading());
         }
