@@ -9,6 +9,14 @@ interface JobPostingsById {
   }
 };
 
+/**
+ * A job search result
+ */
+export interface JobSearchResult {
+  id: number,
+  text: string
+}
+
 class JobPostingsSorter {
   postingsTable: HTMLTableElement;
   originalPostings: Array<HTMLTableRowElement>;
@@ -98,9 +106,9 @@ class JobPostingsSorter {
   /**
    * Sorts the job postings in the DOM.
    * Child postings are kept with their parents in their original order.
-   * @param rankedJobIds A ranked list of job posting ids
+   * @param rankedJobs A ranked list of job postings
    */
-  sort(rankedJobIds: Array<number>) {
+  sort(rankedJobs: Array<JobSearchResult>) {
     const oldTBody = this.postingsTable.querySelector('tbody') as HTMLTableSectionElement;
     const newTBody = document.createElement('tbody');
     const sortedRows: Array<HTMLTableRowElement> = [];
@@ -108,17 +116,23 @@ class JobPostingsSorter {
 
     // Create sorted list of displayed postings
     console.log('Ranked output from search')
-    rankedJobIds.forEach((postingId, i) => {
-      if (!this.rowsById[postingId]) {
+    rankedJobs.forEach((posting, i) => {
+      if (!this.rowsById[posting.id]) {
         return;
       }
 
-      const { originalOrder, row, children } = this.rowsById[postingId];
+      const { originalOrder, row, children } = this.rowsById[posting.id];
       const comment = row.querySelector('.comment');
       const content = comment && comment.textContent?.trim();
-      sortedRows.push(row);
+      const clonedRow = row.cloneNode(true) as HTMLTableRowElement;
+      const clonedRowTextSpan = clonedRow.querySelector('.commtext');
+      if (clonedRowTextSpan) {
+        clonedRowTextSpan.innerHTML = posting.text;
+      }
+
+      sortedRows.push(clonedRow);
       console.log({
-        postId: postingId,
+        postId: posting.id,
         originalOrder: originalOrder,
         newOrder: i + 1,
         text: content

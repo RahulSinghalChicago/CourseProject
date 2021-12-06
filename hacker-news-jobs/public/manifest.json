@@ -2,9 +2,9 @@
   "name": "HN Jobs",
   "description": "Hacker News Jobs Extension",
   "icons": {
-    "16": "logo192.png",
-    "48": "logo192.png",
-    "128": "logo192.png"
+    "16": "logo128.png",
+    "48": "logo128.png",
+    "128": "logo128.png"
   },
   "action": {
     "default_popup": "index.html",
