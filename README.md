@@ -1,5 +1,8 @@
 # CourseProject
 
+## Project Documentation
+Please see the PDF file above
+
 ## Testing
 
 To test the search results, we used the following queries and measured precision @ 10 recommendations:
