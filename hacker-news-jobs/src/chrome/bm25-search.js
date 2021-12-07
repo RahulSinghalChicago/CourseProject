@@ -11,6 +11,7 @@ const getSpottedTerms = require('wink-bm25-text-search/runkit/get-spotted-terms.
 // Load wink nlp and its model
 const nlp = winkNLP(model);
 const its = nlp.its;
+var engine = null;
 
 const pipe = [
   nlpUtils.string.lowerCase,
@@ -30,8 +31,9 @@ function highlightTerms(body, spotted) {
 
 function bm25Search(jobPostings, query = "machine learning") {
   if (!engine) {
+    console.log("Initializing Engine");
     // Create search engine's instance
-    var engine = bm25();
+    engine = bm25();
 
     // Step I: Define config
     engine.defineConfig({ fldWeights: { text: 1 } });
@@ -66,7 +68,7 @@ function bm25Search(jobPostings, query = "machine learning") {
 
   // All set, start searching!
   // `results` is an array of [ doc-id, score ], sorted by score
-  var results = engine.search(query);
+  var results = engine.search(query, 100);
   console.log('%d entries found.', results.length);
   const sortedResults = [];
   const spotted = getSpottedTerms(results, query, jobPostingsById, ['text'], pipe, 3);
