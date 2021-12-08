@@ -1,7 +1,7 @@
 # CourseProject
 
 ## Presentation
-https://us02web.zoom.us/rec/play/9zcn6ECFvSSa93p052lSheSXZIPbihVuO43Whj1hhvZqHcbRnIGox_EKeM1XSLR0VXGytStPAyR3B4T0.D7_wByk7ZgV-1sYk
+[Presentation video](https://us02web.zoom.us/rec/play/9zcn6ECFvSSa93p052lSheSXZIPbihVuO43Whj1hhvZqHcbRnIGox_EKeM1XSLR0VXGytStPAyR3B4T0.D7_wByk7ZgV-1sYk)
 
 Please see the PDF of presentation above
 
