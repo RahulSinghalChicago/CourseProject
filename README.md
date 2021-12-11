@@ -7,7 +7,7 @@ Please see the PDF of presentation above
 
 ## Install
 
-[Chrome Store Extension](https://chrome.google.com/webstore/detail/hn-jobs/coalohjehpmkdkoanegjcpmihlnhnbjl?hl=en&authuser=0)
+[Chrome Store Extension v1.1](https://chrome.google.com/webstore/detail/hn-jobs/coalohjehpmkdkoanegjcpmihlnhnbjl?hl=en&authuser=0)
 
 ## Project Documentation
 Please see the PDF file above
